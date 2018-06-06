@@ -62,8 +62,9 @@ class AssetSummaryReport(models.TransientModel):
                 elif field == 'Column 4':
                     worksheet.write(col, raw, 0.0, base_style)
                 elif field == 'Column 5':
-                    depreciation_lines = prev_records.filtered(lambda rec: rec.state == 'open').mapped('depreciation_line_ids')
-                    value = sum(depreciation_lines.filtered(lambda rec: rec.depreciation_date < self.date_from).mapped('amount'))
+                    res = self.env['account.asset.asset'].search([('state', '!=', 'draft'), ('date', '<', self.date_to)])
+                    depreciation_lines = res.filtered(lambda rec: rec.state == 'open').mapped('depreciation_line_ids')
+                    value = sum(depreciation_lines.filtered(lambda rec: rec.depreciation_date < self.date_to).mapped('amount'))
                     worksheet.write(col, raw, value, base_style)
                 elif field == 'Column 6':
                     depreciation_lines = records.filtered(lambda rec: rec.state == 'open').mapped('depreciation_line_ids')
