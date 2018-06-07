@@ -63,8 +63,8 @@ class AssetDetailReport(models.TransientModel):
                 elif field == 'Plus/minus transfers(always 0.00)':
                     worksheet.write(col, raw, 0.0, base_style)
                 elif field == 'Depreciation since start still last year':
-                    depreciation_lines = asset.filtered(lambda rec: rec.state == 'open' and rec.date < self.date_from).mapped('depreciation_line_ids')
-                    value = sum(depreciation_lines.filtered(lambda rec: rec.depreciation_date < self.date_from).mapped('amount'))
+                    depreciation_lines = asset.filtered(lambda rec: rec.state == 'open' and rec.date < self.date_to).mapped('depreciation_line_ids')
+                    value = sum(depreciation_lines.filtered(lambda rec: rec.depreciation_date < self.date_to).mapped('amount'))
                     worksheet.write(col, raw, value, base_style)
                 elif field == 'Residual end of this year':
                     depreciation_lines = asset.filtered(lambda rec: rec.state == 'open' and rec.date >= self.date_from and rec.date <= self.date_to).mapped('depreciation_line_ids')
