@@ -5,6 +5,7 @@ import base64
 from datetime import datetime
 from odoo.tools.misc import xlwt
 from io import BytesIO
+from dateutil.relativedelta import relativedelta
 
 from odoo import api, fields, models, _
 from odoo.exceptions import ValidationError
@@ -31,6 +32,8 @@ class AssetDetailReport(models.TransientModel):
                                                       ('date', '<=', self.date_to)])
         prev_records = self.env['account.asset.asset'].search([('state', '!=', 'draft'), ('date', '<', self.date_from)])
         tot_records = records + prev_records
+        last_date_from = fields.Date.to_string(fields.Date.from_string(self.date_from) + relativedelta(years=-1))
+        last_date_to = fields.Date.to_string(fields.Date.from_string(self.date_to) + relativedelta(years=-1))
         if not tot_records:
             raise ValidationError(_('There are no record Found!'))
         # accounts = records.mapped('category_id').mapped('account_asset_id')
@@ -64,18 +67,19 @@ class AssetDetailReport(models.TransientModel):
                     worksheet.write(col, raw, 0.0, base_style)
                 elif field == 'Depreciation since start still last year':
                     depreciation_lines = asset.filtered(lambda rec: rec.state == 'open' and rec.date < self.date_to).mapped('depreciation_line_ids')
-                    value = sum(depreciation_lines.filtered(lambda rec: rec.depreciation_date < self.date_to).mapped('amount'))
+                    value = sum(depreciation_lines.filtered(lambda rec: rec.depreciation_date <= self.date_to).mapped('amount'))
                     worksheet.write(col, raw, value, base_style)
                 elif field == 'Residual end of this year':
                     depreciation_lines = asset.filtered(lambda rec: rec.state == 'open' and rec.date >= self.date_from and rec.date <= self.date_to).mapped('depreciation_line_ids')
-                    value = sum(depreciation_lines.filtered(lambda rec: fields.Datetime.from_string(rec.depreciation_date).month == self.env.user.company_id.fiscalyear_last_month).mapped('remaining_value'))
+                    value = sum(depreciation_lines.filtered(lambda rec: rec.depreciation_date <= self.date_to and fields.Datetime.from_string(rec.depreciation_date).month == self.env.user.company_id.fiscalyear_last_month).mapped('remaining_value'))
                     worksheet.write(col, raw, value, base_style)
                 elif field == 'Residual still last year':
                     depreciation_lines = asset.filtered(lambda rec: rec.state == 'open' and rec.date < self.date_from).mapped('depreciation_line_ids')
-                    value = sum(depreciation_lines.filtered(lambda rec: fields.Datetime.from_string(rec.depreciation_date).month == self.env.user.company_id.fiscalyear_last_month).mapped('remaining_value'))
+                    value = sum(depreciation_lines.filtered(lambda rec: rec.depreciation_date >= last_date_from and rec.depreciation_date <= last_date_to and fields.Datetime.from_string(rec.depreciation_date).month == self.env.user.company_id.fiscalyear_last_month).mapped('remaining_value'))
                     worksheet.write(col, raw, value, base_style)
                 elif field == 'Depreciation this year':
-                    value = sum(asset.filtered(lambda rec: rec.state == 'open' and rec.date >= self.date_from and rec.date <= self.date_to).mapped('depreciation_line_ids').mapped('amount'))
+                    depreciation_lines = asset.filtered(lambda rec: rec.state == 'open' and rec.date >= self.date_from and rec.date <= self.date_to).mapped('depreciation_line_ids')
+                    value = sum(depreciation_lines.filtered(lambda rec: rec.depreciation_date >= self.date_from and rec.depreciation_date <= self.date_to).mapped('amount'))
                     worksheet.write(col, raw, value, base_style)
                 elif field == 'Depreciation this year(always 0.00)':
                     worksheet.write(col, raw, 0.0, base_style)
