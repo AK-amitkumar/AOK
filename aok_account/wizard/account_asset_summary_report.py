@@ -5,6 +5,7 @@ import base64
 from datetime import datetime
 from odoo.tools.misc import xlwt
 from io import BytesIO
+from dateutil.relativedelta import relativedelta
 
 from odoo import api, fields, models, _
 from odoo.exceptions import ValidationError
@@ -31,6 +32,8 @@ class AssetSummaryReport(models.TransientModel):
                                                       ('date', '<=', self.date_to)])
         prev_records = self.env['account.asset.asset'].search([('state', '!=', 'draft'), ('date', '<', self.date_from)])
         tot_records = records + prev_records
+        last_date_from = fields.Date.to_string(fields.Date.from_string(self.date_from) + relativedelta(years=-1))
+        last_date_to = fields.Date.to_string(fields.Date.from_string(self.date_to) + relativedelta(years=-1))
         if not tot_records:
             raise ValidationError(_('There are no record Found!'))
         accounts = records.mapped('category_id').mapped('account_asset_id')
@@ -72,7 +75,7 @@ class AssetSummaryReport(models.TransientModel):
                     worksheet.write(col, raw, value, base_style)
                 elif field == 'Column 7':
                     depreciation_lines = prev_records.filtered(lambda rec: rec.state == 'open').mapped('depreciation_line_ids')
-                    value = sum(depreciation_lines.filtered(lambda rec: rec.depreciation_date < self.date_from and fields.Datetime.from_string(rec.depreciation_date).month == self.env.user.company_id.fiscalyear_last_month).mapped('remaining_value'))
+                    value = sum(depreciation_lines.filtered(lambda rec: rec.depreciation_date >= last_date_from and rec.depreciation_date <= last_date_to and fields.Datetime.from_string(rec.depreciation_date).month == self.env.user.company_id.fiscalyear_last_month).mapped('remaining_value'))
                     worksheet.write(col, raw, value, base_style)
                 elif field == 'Column 8':
                     depreciation_lines = records.filtered(lambda rec: rec.state == 'open').mapped('depreciation_line_ids')
