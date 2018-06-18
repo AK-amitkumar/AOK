@@ -275,7 +275,7 @@ class AccountMove(models.Model):
                 if new_name and invoice and invoice.type != 'in_invoice':
                     move.name = new_name
                 if new_name and invoice and invoice.type == 'in_invoice':
-                    move.name = invoice.number
+                    move.name = invoice.number or new_name
         return self.write({'state': 'posted'})
 
 
