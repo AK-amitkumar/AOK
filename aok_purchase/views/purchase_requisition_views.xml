@@ -131,4 +131,15 @@
         </field>
     </record>
 
+    <record id="action_purchase_order_line_aok" model="ir.actions.act_window">
+        <field name="name">Purchase Order Lines</field>
+        <field name="res_model">purchase.order.line</field>
+        <field name="view_type">form</field>
+        <field name="view_mode">tree,form</field>
+        <field name="view_id" ref="purchase.purchase_order_line_tree"/>
+    </record>
+
+    <menuitem id="menu_purchase_order_line_aok" name="Anfrage- und Auftragspositionen" parent="purchase.menu_procurement_management" sequence="7"
+        action="action_purchase_order_line_aok"/>
+
 </odoo>
