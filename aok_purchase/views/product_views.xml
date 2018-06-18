@@ -51,8 +51,8 @@
                     <group>
                         <field name="checklist_ids">
                             <tree string="Checklist Attributes" editable="bottom" delete="false">
-                                <field name="name"/>
-                                <field name="value" attrs="{'required':[('require', '=', True)]}"/>
+                                <field name="name" class="col-md-4"/>
+                                <field name="value" class="col-md-8" attrs="{'required':[('require', '=', True)]}"/>
                                 <field name="require" invisible="1"/>
                             </tree>
                         </field>
