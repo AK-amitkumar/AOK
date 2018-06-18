@@ -30,6 +30,7 @@ class StockPicking(models.Model):
     picking_nok = fields.Boolean(string="Picking NOK", compute="_compute_picking_nok", store=True)
     picker_id = fields.Many2one('res.users', string="Picker")
     package_count = fields.Integer(compute="_compute_package_count", string="Package Count")
+    received_date = fields.Datetime("Empfangsdatum")
 
     def _compute_package_count(self):
         for picking in self:
