@@ -42,22 +42,24 @@
                     <group>
                         <group>
                             <field name="checklist_category_id"/>
-                            <field name="checklist_ids">
-                                <tree string="Checklist Attributes" editable="bottom" delete="false">
-                                    <field name="name"/>
-                                    <field name="value" attrs="{'required':[('require', '=', True)]}"/>
-                                    <field name="require" invisible="1"/>
-                                </tree>
-                            </field>
                         </group>
                         <group>
                             <field name="sustained"/>
                             <field name="delivery_strategy"/>
                         </group>
                     </group>
+                    <group>
+                        <field name="checklist_ids">
+                            <tree string="Checklist Attributes" editable="bottom" delete="false">
+                                <field name="name" class="col-md-4"/>
+                                <field name="value" class="col-md-8" attrs="{'required':[('require', '=', True)]}"/>
+                                <field name="require" invisible="1"/>
+                            </tree>
+                        </field>
+                    </group>
                     <group colspan="4">
-                    	<field name="description"/>
-                   	</group>
+                        <field name="description"/>
+                    </group>
                 </page>
              </page>
         </field>
